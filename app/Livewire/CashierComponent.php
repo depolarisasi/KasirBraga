@@ -172,8 +172,11 @@ class CashierComponent extends Component
     public function removeFromCart($productId)
     {
         try {
-            $this->transactionService->removeFromCart($productId);
-            $this->info('Produk dihapus dari keranjang.');
+            $this->transactionService->removeFromCart($productId); 
+            LivewireAlert::title('Berhasil!')
+            ->text('Produk dihapus dari keranjang.')
+            ->success()
+            ->show();
         } catch (\Exception $e) {
             $errorMessage = $e->getMessage() ?: 'Terjadi kesalahan saat menghapus produk dari keranjang.';
             LivewireAlert::title('Terjadi kesalahan!')
