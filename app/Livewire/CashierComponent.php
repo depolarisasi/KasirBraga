@@ -243,6 +243,13 @@ class CashierComponent extends Component
             $this->selectedPartner = null;
         }
         
+        // Set payment method based on order type
+        if ($this->orderType === 'online' && $this->selectedPartner) {
+            $this->paymentMethod = 'aplikasi';
+        } else {
+            $this->paymentMethod = 'cash'; // Default to cash for other order types
+        }
+        
         // Reset ad-hoc discount inputs
         $this->adhocDiscountPercentage = 0;
         $this->adhocDiscountAmount = 0;
@@ -262,17 +269,22 @@ class CashierComponent extends Component
         
         // Only refresh if order type is online
         if ($this->orderType === 'online') {
-            // Refresh cart prices for partner pricing
-            $this->transactionService->refreshCartPrices($this->orderType, $this->selectedPartner);
-            
+            // Set payment method to aplikasi when partner is selected for online orders
             if ($this->selectedPartner) {
+                $this->paymentMethod = 'aplikasi';
                 $partner = Partner::find($this->selectedPartner);
                 
                 LivewireAlert::title('Partner Dipilih')
-                ->text("Harga partner untuk {$partner->name} telah diterapkan ke keranjang.")
+                ->text("Harga partner untuk {$partner->name} telah diterapkan ke keranjang. Metode pembayaran otomatis diset ke Aplikasi.")
                 ->info()
                 ->show();
+            } else {
+                // Reset payment method if no partner selected
+                $this->paymentMethod = 'cash';
             }
+            
+            // Refresh cart prices for partner pricing
+            $this->transactionService->refreshCartPrices($this->orderType, $this->selectedPartner);
             
             \Log::info('CashierComponent: Cart prices refreshed after partner change');
         }
@@ -653,6 +665,15 @@ class CashierComponent extends Component
             if (!in_array($this->paymentMethod, ['cash', 'qris', 'aplikasi'])) {
                 LivewireAlert::title('Error!')
                 ->text('Metode pembayaran tidak valid.')
+                ->error()
+                ->show();
+                return;
+            }
+
+            // Validate payment method for online orders with partner
+            if ($this->orderType === 'online' && $this->selectedPartner && $this->paymentMethod !== 'aplikasi') {
+                LivewireAlert::title('Error!')
+                ->text('Pesanan online dengan partner hanya dapat menggunakan metode pembayaran Aplikasi.')
                 ->error()
                 ->show();
                 return;

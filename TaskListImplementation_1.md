@@ -1,58 +1,44 @@
 # Task List Implementation #1
 
 ## Request Overview
-Standardisasi layout untuk 7 halaman yang belum menggunakan standard layout agar konsisten dengan design system yang sudah established di KasirBraga.
+1. Untuk jenis pesanan ONLINE (with partner), sembunyikan metode pembayaran Tunai dan QRIS, hanya tampilkan pilihan Aplikasi
+2. Mengatasi error SQLSTATE[01000]: Warning: 1265 Data truncated for column 'payment_method' saat pembayaran dengan metode Aplikasi
 
 ## Analysis Summary
-Berdasarkan pattern yang sudah diterapkan di `/admin/store-config/`, `/admin/dashboard`, dan `/staf/cashier/index`, layout standard menggunakan struktur:
-- `@extends('layouts.app')`
-- Container dengan `mx-auto px-8 py-4 bg-base-200`
-- Page Header dengan title, description, dan action buttons
-- Card wrapper dengan `bg-base-300 shadow-lg`
-- Card body dengan icon + title untuk sections
+- Request 1: Conditional display logic untuk payment methods berdasarkan order type
+- Request 2: Database schema issue - kolom payment_method terlalu pendek untuk value 'aplikasi'
+- Solusi: Update database schema dan implementasi conditional payment methods
 
 ## Implementation Tasks
 
-### Task 1: Standardize Admin Reports Layout ✅ COMPLETED
-- [X] Subtask 1.1: Update /admin/reports/sales layout structure
-- [X] Subtask 1.2: Update /admin/reports/stock layout structure
-- [X] Subtask 1.3: Update /admin/reports/expenses layout structure
+### Task 1: Investigate Database Schema
+- [ ] Subtask 1.1: Check current database structure untuk table transactions dan kolom payment_method
+- [ ] Subtask 1.2: Identify panjang maksimal yang dibutuhkan untuk payment method values
+- [ ] Subtask 1.3: Check existing migration files terkait transactions table
 
-### Task 2: Standardize Staff Pages Layout ✅ COMPLETED
-- [X] Subtask 2.1: Update /staf/expenses layout structure
-- [X] Subtask 2.2: Update /staf/stock-sate layout structure
-- [X] Subtask 2.3: Update /staf/transactions layout structure (TransactionPageComponent already uses correct container pattern)
+### Task 2: Fix Database Schema
+- [ ] Subtask 2.1: Create migration untuk memperpanjang kolom payment_method di table transactions
+- [ ] Subtask 2.2: Update migration dengan length yang appropriate untuk semua payment methods
+- [ ] Subtask 2.3: Test migration di development environment
 
-### Task 3: Standardize Admin User Management Layout ✅ COMPLETED
-- [X] Subtask 3.1: Update /admin/users layout structure
+### Task 3: Update Payment Method Logic di CashierComponent
+- [ ] Subtask 3.1: Modify render method untuk conditional payment methods berdasarkan order type
+- [ ] Subtask 3.2: Update openCheckoutModal method untuk handle online order payment restrictions
+- [ ] Subtask 3.3: Implement validation logic untuk online orders (hanya allow 'aplikasi')
 
-### Task 4: Verification and Consistency Check ✅ COMPLETED
-- [X] Subtask 4.1: Test all updated pages for layout consistency
-- [X] Subtask 4.2: Verify responsive behavior on all pages
-- [X] Subtask 4.3: Ensure all icons and styling match standard
+### Task 4: Update Frontend View Template
+- [ ] Subtask 4.1: Locate dan examine checkout modal template/view
+- [ ] Subtask 4.2: Implement conditional rendering untuk payment method options
+- [ ] Subtask 4.3: Ensure UI shows only 'Aplikasi' option untuk online orders with partner
 
-## FINAL STATUS: ✅ ALL TASKS COMPLETED SUCCESSFULLY
-
-### Summary of Changes:
-1. **6 View Files Updated**: Converted from `<x-layouts.app>` to `@extends('layouts.app')` 
-2. **Consistent Container Pattern**: All pages now use `container mx-auto px-8 py-4 bg-base-200`
-3. **Standard Header Structure**: Unified page header with title, description, and action buttons
-4. **Card Wrapper Pattern**: All content wrapped in `card bg-base-300 shadow-lg`
-5. **Icon Consistency**: All icons properly sized (w-5 h-5) and positioned
-6. **Responsive Design**: All layouts responsive with mobile-first approach
-
-### Files Modified:
-- ✅ `/admin/reports/sales.blade.php`
-- ✅ `/admin/reports/stock.blade.php`
-- ✅ `/admin/reports/expenses.blade.php`
-- ✅ `/staf/expenses/index.blade.php`
-- ✅ `/staf/stock-sate/index.blade.php`
-- ✅ `/admin/users/index.blade.php`
-- ✅ `/staf/transactions` (TransactionPageComponent already consistent)
+### Task 5: Testing dan Validation
+- [ ] Subtask 5.1: Test database changes dengan semua payment method values
+- [ ] Subtask 5.2: Test UI behavior untuk online orders (hanya 'Aplikasi' visible)
+- [ ] Subtask 5.3: Test transaction completion dengan payment method 'aplikasi'
+- [ ] Subtask 5.4: Verify no errors dengan other order types (dine_in, take_away)
 
 ## Notes
-- Maintain all existing functionality and Livewire components
-- Use consistent DaisyUI classes and spacing
-- Preserve existing action buttons and filters in proper header structure
-- Ensure all pages follow the same container → header → card → content pattern
-- Keep existing SVG icons but ensure proper sizing (w-5 h-5) 
+- Prioritaskan database fix terlebih dahulu untuk mengatasi truncation error
+- Pastikan backward compatibility dengan existing payment methods
+- Perhatikan existing validation rules dalam TransactionService
+- Test thoroughly dengan different order types dan scenarios 
